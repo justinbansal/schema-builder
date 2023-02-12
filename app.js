@@ -58,7 +58,6 @@ choiceForm.addEventListener('submit', e => {
       if (element.checked) {
         const value = element.nextElementSibling.innerText.toLowerCase();
         state.chosenFormElements.push(value);
-        console.log(state.chosenFormElements);
       }
     }
 
@@ -89,41 +88,23 @@ function buildFormElements(array) {
   // takes in array of form elements
   // builds html for it
 
-  console.log(array);
-
   array.forEach(element => {
-    // build out form inputs
-
-    // name, class, limit
-
     if (element === 'name') {
-      const nameInput = document.createElement('input');
-      const nameLabel = document.createElement('label');
-      nameInput.setAttribute('type', 'text');
-      nameInput.setAttribute('name', 'name');
-      nameLabel.setAttribute('for', 'name');
-      nameLabel.innerText = 'Name';
-      reviewFormElementsForm.append(nameLabel, nameInput);
+      const nameInput = createTextInput('Name', 'name');
+
+      reviewFormElementsForm.append(nameInput.labelInput, nameInput.textInput);
     }
 
     if (element === 'class') {
-      const classInput = document.createElement('input');
-      const classLabel = document.createElement('label');
-      classInput.setAttribute('type', 'text');
-      classInput.setAttribute('name', 'class');
-      classLabel.setAttribute('for', 'class');
-      classLabel.innerText = 'Class';
-      reviewFormElementsForm.append(classLabel, classInput);
+      const limitInput = createTextInput('Class', 'class');
+
+      reviewFormElementsForm.append(limitInput.labelInput, limitInput.textInput);
     }
 
     if (element === 'limit') {
-      const limitInput = document.createElement('input');
-      const limitLabel = document.createElement('label');
-      limitInput.setAttribute('type', 'number');
-      limitInput.setAttribute('name', 'limit');
-      limitLabel.setAttribute('for', 'limit');
-      limitLabel.innerText = 'Limit';
-      reviewFormElementsForm.append(limitLabel, limitInput);
+      const limitInput = createNumberInput('Limit', 'limit');
+
+      reviewFormElementsForm.append(limitInput.labelInput, limitInput.numberInput);
     }
 
     if (element === 'text') {
@@ -139,7 +120,7 @@ function buildFormElements(array) {
     if (element === 'number') {
       const numberIdInput = createTextInput('Number ID', 'number-id');
       const numberLabelInput = createTextInput('Number Label', 'number-label');
-      const numberDefaultInput = createNumberInput('Default Value', 'number-default'); // needs to be a number input actually
+      const numberDefaultInput = createNumberInput('Default Value', 'number-default');
 
       reviewFormElementsForm.append(numberIdInput.labelInput, numberIdInput.textInput);
       reviewFormElementsForm.append(numberLabelInput.labelInput, numberLabelInput.textInput);
@@ -165,13 +146,47 @@ function buildFormElements(array) {
       reviewFormElementsForm.append(checkboxIdInput.labelInput, checkboxIdInput.textInput);
       reviewFormElementsForm.append(checkboxLabelInput.labelInput, checkboxLabelInput.textInput);
       reviewFormElementsForm.append(checkboxCheckboxInput);
+    }
 
-      const checkboxInput = document.createElement('input');
-      const checkboxSpan = document.createElement('span');
-      const checkboxLabel = document.createElement('label');
+    if (element === 'radio') {
 
-      checkboxInput.setAttribute('type', 'checkbox');
-      checkboxInput.setAttribute('class', 'filled-in');
+      const radioIdInput = createTextInput('Radio ID', 'radio-id');
+      const radioLabelInput = createTextInput('Radio Label', 'radio-label');
+      const radioTextInput = createTextInput('Radio Options', 'radio-text');
+      radioTextInput.textInput.setAttribute('placeholder', 'Separate options with commas, first option becomes default');
+
+      reviewFormElementsForm.append(radioIdInput.labelInput, radioIdInput.textInput);
+      reviewFormElementsForm.append(radioLabelInput.labelInput, radioLabelInput.textInput);
+      reviewFormElementsForm.append(radioTextInput.labelInput, radioTextInput.textInput);
+    }
+
+    if (element === 'range') {
+      const rangeIdInput = createTextInput('Range ID', 'range-id');
+      const rangeLabelInput = createTextInput('Range Label', 'range-label');
+      const rangeMinInput = createNumberInput('Range Min', 'range-min');
+      const rangeMaxInput = createNumberInput('Range Max', 'range-max');
+      const rangeStepInput = createNumberInput('Range Step', 'range-step');
+      const rangeDefaultInput = createNumberInput('Range Default', 'range-default');
+      const rangeUnitInput = createTextInput('Range Unit', 'range-unit');
+
+      reviewFormElementsForm.append(rangeIdInput.labelInput, rangeIdInput.textInput);
+      reviewFormElementsForm.append(rangeLabelInput.labelInput, rangeLabelInput.textInput);
+      reviewFormElementsForm.append(rangeMinInput.labelInput, rangeMinInput.numberInput);
+      reviewFormElementsForm.append(rangeMaxInput.labelInput, rangeMaxInput.numberInput);
+      reviewFormElementsForm.append(rangeStepInput.labelInput, rangeStepInput.numberInput);
+      reviewFormElementsForm.append(rangeDefaultInput.labelInput, rangeDefaultInput.numberInput);
+      reviewFormElementsForm.append(rangeUnitInput.labelInput, rangeUnitInput.textInput);
+    }
+
+    if (element === 'select') {
+      const selectIdInput = createTextInput('Select ID', 'select-id');
+      const selectLabelInput = createTextInput('Select Label', 'select-label');
+      const selectTextInput = createTextInput('Select Options', 'select-text');
+      selectTextInput.textInput.setAttribute('placeholder', 'Separate options with commas, first option becomes default');
+
+      reviewFormElementsForm.append(selectIdInput.labelInput, selectIdInput.textInput);
+      reviewFormElementsForm.append(selectLabelInput.labelInput, selectLabelInput.textInput);
+      reviewFormElementsForm.append(selectTextInput.labelInput, selectTextInput.textInput);
     }
   })
 
@@ -228,6 +243,25 @@ function createCheckboxInput(name = 'Enabled by Default') {
   return container;
 }
 
+function createRadioInputs(name, options) {
+  for (const option in options) {
+    const container = document.createElement('p');
+
+    const optionInput = document.createElement('input');
+    optionInput.setAttribute('type', 'radio');
+    optionInput.setAttribute('name', name);
+
+    const optionSpan = document.createElement('span');
+    optionSpan.innerText = option;
+
+    const optionLabel = document.createElement('label');
+    optionLabel.append();
+    container.append(optionLabel);
+
+    return container;
+  }
+}
+
 function reviewFormElementsFormSubmission(e) {
   e.preventDefault();
 
@@ -235,7 +269,13 @@ function reviewFormElementsFormSubmission(e) {
 
   let array = [];
   let headers = {};
+  let checkboxSetting;
   let numberSetting;
+  let radioSetting;
+  let rangeSetting;
+  let selectSetting;
+  let textSetting;
+  let textareaSetting;
 
   console.log(formElements);
 
@@ -248,17 +288,34 @@ function reviewFormElementsFormSubmission(e) {
   formElements.forEach(element => {
     const name = element.name;
 
-    // create an object w/ data and push into an array
+    // create an object w/ data and push into an array that we'll later use to build the JSON
+
+    // headers
+
+    // checkbox setting
+
+    // number setting
+
+    // radio setting
+
+    // range setting
+
+    // select setting
+
+    // text setting
+
+    // textarea setting
+
     if (name === 'name') {
-      headers.name = name;
+      headers.name = element.value;
     }
 
     if (name === 'class') {
-      headers.class = name;
+      headers.class = element.value;
     }
 
     if (name === 'limit') {
-      headers.limit = name;
+      headers.limit = element.value;
     }
 
     if (name.includes('number')) {
@@ -279,14 +336,17 @@ function reviewFormElementsFormSubmission(e) {
     }
   })
 
-  array.push(JSON.stringify(headers));
+  array.push(headers);
 
+  console.log(array);
+
+  // array.push(JSON.stringify(headers));
 
   // calls schema build function
-  buildSchema(array);
+  // buildSchema(array);
 }
 
-function buildSchema(array) { // need form values now
+function buildSchema(array) {
   console.log(array[0]) // ['name', 'class', 'text', 'textarea']
 
   // build headers
