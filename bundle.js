@@ -93,7 +93,10 @@ function buildFormElements(array) {
       reviewFormElementsForm.append(textIdInput.labelInput, textIdInput.textInput);
       reviewFormElementsForm.append(textLabelInput.labelInput, textLabelInput.textInput);
       reviewFormElementsForm.append(textCheckboxInput);
+
+      // TODO: default needs to be text input instead of checkbox
     }
+
     if (element === 'number') {
       const numberIdInput = createTextInput('Number ID', 'number-id');
       const numberLabelInput = createTextInput('Number Label', 'number-label');
@@ -109,7 +112,10 @@ function buildFormElements(array) {
       reviewFormElementsForm.append(textareaIdInput.labelInput, textareaIdInput.textInput);
       reviewFormElementsForm.append(textareaLabelInput.labelInput, textareaLabelInput.textInput);
       reviewFormElementsForm.append(textareaCheckboxInput);
+
+      // TODO: default needs to be text input instead of checkbox
     }
+
     if (element === 'checkbox') {
       const checkboxIdInput = createTextInput('Checkbox ID', 'checkbox-id');
       const checkboxLabelInput = createTextInput('Checkbox Label', 'checkbox-label');
@@ -121,7 +127,7 @@ function buildFormElements(array) {
     if (element === 'radio') {
       const radioIdInput = createTextInput('Radio ID', 'radio-id');
       const radioLabelInput = createTextInput('Radio Label', 'radio-label');
-      const radioTextInput = createTextInput('Radio Options', 'radio-text');
+      const radioTextInput = createTextInput('Radio Options', 'radio-options');
       radioTextInput.textInput.setAttribute('placeholder', 'Separate options with commas, first option becomes default');
       reviewFormElementsForm.append(radioIdInput.labelInput, radioIdInput.textInput);
       reviewFormElementsForm.append(radioLabelInput.labelInput, radioLabelInput.textInput);
@@ -146,7 +152,7 @@ function buildFormElements(array) {
     if (element === 'select') {
       const selectIdInput = createTextInput('Select ID', 'select-id');
       const selectLabelInput = createTextInput('Select Label', 'select-label');
-      const selectTextInput = createTextInput('Select Options', 'select-text');
+      const selectTextInput = createTextInput('Select Options', 'select-options');
       selectTextInput.textInput.setAttribute('placeholder', 'Separate options with commas, first option becomes default');
       reviewFormElementsForm.append(selectIdInput.labelInput, selectIdInput.textInput);
       reviewFormElementsForm.append(selectLabelInput.labelInput, selectLabelInput.textInput);
@@ -181,13 +187,14 @@ function createNumberInput(label, name) {
     labelInput
   };
 }
-function createCheckboxInput(name = 'Enabled by Default') {
+function createCheckboxInput(label = 'Enabled by Default') {
   const container = document.createElement('p');
   const checkboxInput = document.createElement('input');
   checkboxInput.setAttribute('type', 'checkbox');
   checkboxInput.setAttribute('class', 'filled-in');
+  checkboxInput.setAttribute('name', 'checkbox-default');
   const checkboxSpan = document.createElement('span');
-  checkboxSpan.innerText = name;
+  checkboxSpan.innerText = label;
   const checkboxLabel = document.createElement('label');
   checkboxLabel.append(checkboxInput, checkboxSpan);
   container.append(checkboxLabel);
@@ -210,65 +217,88 @@ function createRadioInputs(name, options) {
 function reviewFormElementsFormSubmission(e) {
   e.preventDefault();
   const formElements = [...reviewFormElementsForm.elements];
+  console.log(formElements);
+  const inputElements = formElements.filter(element => element.type !== 'submit');
   let array = [];
   let headers = {};
-  let checkboxSetting;
-  let numberSetting;
-  let radioSetting;
-  let rangeSetting;
-  let selectSetting;
-  let textSetting;
-  let textareaSetting;
-  console.log(formElements);
-  if (formElements.find(element => element.name.includes('number'))) {
-    numberSetting = {
-      type: 'number'
-    };
+  let checkboxSetting = {
+    type: 'checkbox'
+  };
+  let numberSetting = {
+    type: 'number'
+  };
+  let radioSetting = {
+    type: 'radio'
+  };
+  let rangeSetting = {
+    type: 'range'
+  };
+  let selectSetting = {
+    type: 'select'
+  };
+  let textSetting = {
+    type: 'text'
+  };
+  let textareaSetting = {
+    type: 'textarea'
+  };
+  function buildSettingObject(settingObject, array) {
+    console.log(array);
+    console.log(settingObject);
+    array.forEach(element => {
+      // build property using element name
+      let property;
+      let stringItems;
+      if (element.name.includes('-')) {
+        stringItems = element.name.split('-');
+        console.log(stringItems);
+        property = stringItems[stringItems.length - 1];
+      } else {
+        property = element.name;
+      }
+      console.log(property);
+      if (property === 'options') {
+        let optionValues = element.value.toLowerCase().split(',').map(value => value.trim());
+        console.log(optionValues);
+        settingObject.options = [];
+
+        // assumes value & label to be the same
+        // need to add method to capitalize first letter of option for label
+
+        for (const option of optionValues) {
+          settingObject.options.push({
+            value: option,
+            label: option
+          });
+        }
+        settingObject.default = optionValues[0];
+      } else {
+        settingObject[property] = property === 'default' ? element.checked ? element.checked : parseInt(element.value, 10) : element.value.toLowerCase();
+
+        // TODO: if number input value should be converted to an integer
+
+        // TODO: update order of properties in setting object
+      }
+    });
   }
-  formElements.forEach(element => {
-    const name = element.name;
 
-    // create an object w/ data and push into an array that we'll later use to build the JSON
-
-    // headers
-
-    // checkbox setting
-
-    // number setting
-
-    // radio setting
-
-    // range setting
-
-    // select setting
-
-    // text setting
-
-    // textarea setting
-
-    if (name === 'name') {
-      headers.name = element.value;
-    }
-    if (name === 'class') {
-      headers.class = element.value;
-    }
-    if (name === 'limit') {
-      headers.limit = element.value;
-    }
-    if (name.includes('number')) {
-      if (name.includes('id')) {
-        numberSetting.id = element.value;
-      }
-      if (name.includes('label')) {
-        numberSetting.label = element.value;
-      }
-      if (name.includes('default')) {
-        numberSetting.default = element.value;
-      }
-      console.log(numberSetting);
-    }
-  });
-  array.push(headers);
+  let headerElsArray = inputElements.filter(element => element.name === 'name' || element.name === 'class' || element.name === 'limit');
+  buildSettingObject(headers, headerElsArray);
+  let checkboxElsArray = inputElements.filter(element => element.name.includes('checkbox'));
+  buildSettingObject(checkboxSetting, checkboxElsArray);
+  let numberElsArray = inputElements.filter(element => element.name.includes('number'));
+  buildSettingObject(numberSetting, numberElsArray);
+  let radioElsArray = inputElements.filter(element => element.name.includes('radio'));
+  buildSettingObject(radioSetting, radioElsArray);
+  let rangeElsArray = inputElements.filter(element => element.name.includes('range'));
+  buildSettingObject(rangeSetting, rangeElsArray);
+  let selectElsArray = inputElements.filter(element => element.name.includes('select'));
+  buildSettingObject(selectSetting, selectElsArray);
+  let textElsArray = inputElements.filter(element => element.name.includes('text'));
+  buildSettingObject(textSetting, textElsArray);
+  let textareaElsArray = inputElements.filter(element => element.name.includes('textarea'));
+  buildSettingObject(textareaSetting, textareaElsArray);
+  array.push(headers, checkboxSetting, numberSetting, radioSetting, rangeSetting, selectSetting, textSetting, textareaSetting);
   console.log(array);
 
   // array.push(JSON.stringify(headers));
