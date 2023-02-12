@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Schema Builder</title>
+
+  <!--Import Google Icon Font-->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <!--Import materialize.css-->
+  <link type="text/css" rel="stylesheet" href="./node_modules/materialize-css/dist/css/materialize.min.css"
+    media="screen,projection" />
+  <link rel="stylesheet" href="./styles.css">
+</head>
+
+<body>
+
+  <div id="app">
+
+    <div class="choose-form-elements">
+      <form data-choose-form-elements>
+        <p>
+          <button data-add-setting>+ Add setting</button>
+        </p>
+        <p>
+          <button data-save-choices>Save choices</button>
+        </p>
+        <p>
+          <label>
+            <input type="checkbox" class="filled-in" />
+            <span>Name</span>
+          </label>
+        </p>
+        <p>
+          <label>
+            <input type="checkbox" class="filled-in" />
+            <span>Class</span>
+          </label>
+        </p>
+        <p>
+          <label>
+            <input type="checkbox" class="filled-in" />
+            <span>Limit</span>
+          </label>
+        </p>
+        <div class="input-field col s12">
+          <select multiple>
+            <option value="" disabled selected>Choose your option</option>
+            <option value="checkbox">Checkbox</option>
+            <option value="number">Number</option>
+            <option value="radio">Radio</option>
+            <option value="range">Range</option>
+            <option value="select">Select</option>
+            <option value="text">Text</option>
+            <option value="textarea">Textarea</option>
+          </select>
+          <label>Setting select</label>
+        </div>
+      </form>
+    </div>
+
+    <div class="review-form-elements">
+      <form data-review-form-elements>
+      </form>
+    </div>
+
+    <pre id="schema"></pre>
+
+  </div>
+
+  <script src="./node_modules/materialize-css/dist/js/materialize.min.js"></script>
+  <script src="bundle.js"></script>
+</body>
+
+</html>

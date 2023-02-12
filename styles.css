@@ -1,0 +1,12 @@
+form {
+  max-width: 500px;
+  margin: 50px auto;
+}
+
+#app {
+  display: flex;
+}
+
+.choose-form-elements {
+  padding: 16px;
+}
