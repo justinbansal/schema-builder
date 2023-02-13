@@ -89,14 +89,11 @@ function buildFormElements(array) {
     if (element === 'text') {
       const textIdInput = createTextInput('Text ID', 'text-id');
       const textLabelInput = createTextInput('Text Label', 'text-label');
-      const textCheckboxInput = createCheckboxInput();
+      const textInput = createTextInput('Text Default', 'text-default');
       reviewFormElementsForm.append(textIdInput.labelInput, textIdInput.textInput);
       reviewFormElementsForm.append(textLabelInput.labelInput, textLabelInput.textInput);
-      reviewFormElementsForm.append(textCheckboxInput);
-
-      // TODO: default needs to be text input instead of checkbox
+      reviewFormElementsForm.append(textInput.labelInput, textInput.textInput);
     }
-
     if (element === 'number') {
       const numberIdInput = createTextInput('Number ID', 'number-id');
       const numberLabelInput = createTextInput('Number Label', 'number-label');
@@ -108,14 +105,11 @@ function buildFormElements(array) {
     if (element === 'textarea') {
       const textareaIdInput = createTextInput('Textarea ID', 'textarea-id');
       const textareaLabelInput = createTextInput('Textarea Label', 'textarea-label');
-      const textareaCheckboxInput = createCheckboxInput();
+      const textareaInput = createTextInput('Textarea Default', 'textarea-default');
       reviewFormElementsForm.append(textareaIdInput.labelInput, textareaIdInput.textInput);
       reviewFormElementsForm.append(textareaLabelInput.labelInput, textareaLabelInput.textInput);
-      reviewFormElementsForm.append(textareaCheckboxInput);
-
-      // TODO: default needs to be text input instead of checkbox
+      reviewFormElementsForm.append(textareaInput.labelInput, textareaInput.textInput);
     }
-
     if (element === 'checkbox') {
       const checkboxIdInput = createTextInput('Checkbox ID', 'checkbox-id');
       const checkboxLabelInput = createTextInput('Checkbox Label', 'checkbox-label');
@@ -200,20 +194,6 @@ function createCheckboxInput(label = 'Enabled by Default') {
   container.append(checkboxLabel);
   return container;
 }
-function createRadioInputs(name, options) {
-  for (const option in options) {
-    const container = document.createElement('p');
-    const optionInput = document.createElement('input');
-    optionInput.setAttribute('type', 'radio');
-    optionInput.setAttribute('name', name);
-    const optionSpan = document.createElement('span');
-    optionSpan.innerText = option;
-    const optionLabel = document.createElement('label');
-    optionLabel.append();
-    container.append(optionLabel);
-    return container;
-  }
-}
 function reviewFormElementsFormSubmission(e) {
   e.preventDefault();
   const formElements = [...reviewFormElementsForm.elements];
@@ -263,7 +243,7 @@ function reviewFormElementsFormSubmission(e) {
         settingObject.options = [];
 
         // assumes value & label to be the same
-        // need to add method to capitalize first letter of option for label
+        // TODO: add method to capitalize first letter of option for label
 
         for (const option of optionValues) {
           settingObject.options.push({
@@ -273,11 +253,15 @@ function reviewFormElementsFormSubmission(e) {
         }
         settingObject.default = optionValues[0];
       } else {
-        settingObject[property] = property === 'default' ? element.checked ? element.checked : parseInt(element.value, 10) : element.value.toLowerCase();
+        if (property === 'default' && element.type === 'checkbox') {
+          settingObject[property] = element.checked;
+        } else if (property === 'default' && element.type === 'number') {
+          settingObject[property] = parseInt(element.value, 10);
+        } else {
+          settingObject[property] = element.value.toLowerCase();
+        }
 
         // TODO: if number input value should be converted to an integer
-
-        // TODO: update order of properties in setting object
       }
     });
   }
@@ -294,29 +278,54 @@ function reviewFormElementsFormSubmission(e) {
   buildSettingObject(rangeSetting, rangeElsArray);
   let selectElsArray = inputElements.filter(element => element.name.includes('select'));
   buildSettingObject(selectSetting, selectElsArray);
-  let textElsArray = inputElements.filter(element => element.name.includes('text'));
+  let textElsArray = inputElements.filter(element => element.name.includes('text') && !element.name.includes('textarea'));
   buildSettingObject(textSetting, textElsArray);
   let textareaElsArray = inputElements.filter(element => element.name.includes('textarea'));
   buildSettingObject(textareaSetting, textareaElsArray);
-  array.push(headers, checkboxSetting, numberSetting, radioSetting, rangeSetting, selectSetting, textSetting, textareaSetting);
+  array.push({
+    type: 'headers',
+    value: headers
+  }, {
+    type: 'setting',
+    value: checkboxSetting
+  }, {
+    type: 'setting',
+    value: numberSetting
+  }, {
+    type: 'setting',
+    value: radioSetting
+  }, {
+    type: 'setting',
+    value: rangeSetting
+  }, {
+    type: 'setting',
+    value: selectSetting
+  }, {
+    type: 'setting',
+    value: textSetting
+  }, {
+    type: 'setting',
+    value: textareaSetting
+  });
   console.log(array);
-
-  // array.push(JSON.stringify(headers));
-
-  // calls schema build function
-  // buildSchema(array);
+  buildSchema(array);
 }
-
 function buildSchema(array) {
-  console.log(array[0]); // ['name', 'class', 'text', 'textarea']
+  // let JSONArray = array.map(element => JSON.stringify(element, null, ' '));
 
-  // build headers
+  let schema = {}; // just make the object the way you want
 
-  let headers = {};
-
-  // build setting objects
-
-  // put together
+  let headersSetting = array.find(setting => setting.type === 'headers');
+  Object.assign(schema, headersSetting.value);
+  schema.settings = [];
+  array.forEach(setting => {
+    if (setting.type === 'setting') {
+      schema.settings.push(setting.value);
+    }
+  });
+  let schemaDisplay = document.querySelector('#schema');
+  schemaDisplay.innerHTML = JSON.stringify(schema, null, " ");
+  console.log(schema);
 }
 
 },{"nanoid":2}],2:[function(require,module,exports){

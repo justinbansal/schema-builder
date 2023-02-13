@@ -10,3 +10,7 @@ form {
 .choose-form-elements {
   padding: 16px;
 }
+
+pre p {
+  margin: 0;
+}
