@@ -16,54 +16,81 @@
 </head>
 
 <body>
-
+  <div class="header">
+    <h1>Schema Builder 👷🏼‍♂️</h1>
+  </div>
   <div id="app">
 
-    <div class="choose-form-elements">
-      <form data-choose-form-elements>
-        <p>
-          <button data-add-setting>+ Add setting</button>
-        </p>
-        <p>
-          <button data-save-choices>Save choices</button>
-        </p>
-        <p>
-          <label>
-            <input type="checkbox" class="filled-in" />
-            <span>Name</span>
-          </label>
-        </p>
-        <p>
-          <label>
-            <input type="checkbox" class="filled-in" />
-            <span>Class</span>
-          </label>
-        </p>
-        <p>
-          <label>
-            <input type="checkbox" class="filled-in" />
-            <span>Limit</span>
-          </label>
-        </p>
-        <div class="input-field col s12">
-          <select multiple>
-            <option value="" disabled selected>Choose your option</option>
-            <option value="checkbox">Checkbox</option>
-            <option value="number">Number</option>
-            <option value="radio">Radio</option>
-            <option value="range">Range</option>
-            <option value="select">Select</option>
-            <option value="text">Text</option>
-            <option value="textarea">Textarea</option>
-          </select>
-          <label>Setting select</label>
-        </div>
-      </form>
+    <div class="choose-settings">
+
+      <h2>Choose your settings</h2>
+      <p>Add all of your setting components in this step.</p>
+
+      <div class="choose-form-elements">
+        <form data-choose-form-elements>
+          <div class="header-settings-wrap">
+            <p>
+              <label>
+                <input type="checkbox" class="filled-in" name="name"/>
+                <span>Section Name</span>
+              </label>
+            </p>
+            <p>
+              <label>
+                <input type="checkbox" class="filled-in" name="class" />
+                <span>Section Class</span>
+              </label>
+            </p>
+            <p>
+              <label>
+                <input type="checkbox" class="filled-in" name="limit" />
+                <span>Section Limit</span>
+              </label>
+            </p>
+          </div>
+          <div class="row section-settings-row">
+            <div class="input-field col s9">
+              <select multiple>
+                <option value="" disabled selected>Choose your option</option>
+                <option value="checkbox">Checkbox</option>
+                <option value="number">Number</option>
+                <option value="radio">Radio</option>
+                <option value="range">Range</option>
+                <option value="select">Select</option>
+                <option value="text">Text</option>
+                <option value="textarea">Textarea</option>
+              </select>
+              <label>Setting picker</label>
+            </div>
+            <div class="col s3">
+              <button class="btn-floating waves-effect waves-light btn-small red" data-add-setting><i class="material-icons">add</i></button>
+            </div>
+          </div>
+          <div class="row">
+            <p>
+              <button class="waves-effect waves-light btn-small brown" data-add-block>Add Block 🧱</button>
+            </p>
+            <!-- Blocks will go here -->
+            <div class="block-display" data-block-display></div>
+          </div>
+          <div class="row submit-changes next-row">
+            <p>
+              <button class="waves-effect waves-light btn-small green" data-save-choices>NEXT</button>
+            </p>
+          </div>
+        </form>
+      </div>
     </div>
 
-    <div class="review-form-elements">
-      <form data-review-form-elements>
-      </form>
+    <div class="review-settings">
+
+      <h2>Fill in your settings</h2>
+      <p>Add data to all of your setting components in this step.</p>
+
+      <div class="review-form-elements">
+        <form data-review-form-elements>
+        </form>
+      </div>
     </div>
 
     <pre>

@@ -12,9 +12,11 @@ let reviewFormElementsForm = document.querySelector('[data-review-form-elements]
 
 reviewFormElementsForm.addEventListener('submit', reviewFormElementsFormSubmission);
 
-
 const addSettingBtn = document.querySelector('[data-add-setting]');
+const addBlockBtn = document.querySelector('[data-add-block]');
+const blockDisplay = document.querySelector('[data-block-display]');
 const choiceForm = document.querySelector('[data-choose-form-elements]');
+const sectionSettingsContainer = choiceForm.querySelector('.section-settings-row');
 
 const newSettingMarkup = `
   <select multiple>
@@ -27,7 +29,7 @@ const newSettingMarkup = `
     <option value="text">Text</option>
     <option value="textarea">Textarea</option>
   </select>
-  <label>Setting select</label>
+  <label>Setting picker</label>
 `;
 
 addSettingBtn.addEventListener('click', e => {
@@ -38,7 +40,60 @@ addSettingBtn.addEventListener('click', e => {
   newDiv.id = nanoid();
   newDiv.innerHTML = newSettingMarkup;
 
-  choiceForm.append(newDiv);
+  sectionSettingsContainer.append(newDiv);
+
+  var elems = choiceForm.querySelectorAll('select');
+  var instances = M.FormSelect.init(elems);
+})
+
+addBlockBtn.addEventListener('click', e => {
+  e.preventDefault();
+
+  const container = document.createElement('div');
+  container.id = nanoid();
+  container.classList.add('block-setting');
+
+  // Add block type, name, settings
+  const blockTypeInput = createTextInput('Block Type', 'block-type');
+  const blockNameInput = createTextInput('Block Name', 'block-name');
+
+  const blockSettingRow = document.createElement('div');
+  blockSettingRow.classList.add('block-setting-row', 'col', 's12');
+
+  const newSettingMarkupDisplay = document.createElement('div');
+  newSettingMarkupDisplay.classList.add('input-field', 'col', 's9');
+  newSettingMarkupDisplay.innerHTML = newSettingMarkup;
+
+  const addBlockSettingBtnMarkup = `
+    <button class="btn-floating waves-effect waves-light btn-small red" data-add-block-setting><i class="material-icons">add</i></button>
+  `
+
+  const addBlockSettingDisplay = document.createElement('div');
+  addBlockSettingDisplay.classList.add('col', 's3');
+  addBlockSettingDisplay.innerHTML = addBlockSettingBtnMarkup;
+
+  blockSettingRow.append(newSettingMarkupDisplay, addBlockSettingDisplay);
+
+  container.append(blockTypeInput.labelInput, blockTypeInput.textInput, blockNameInput.labelInput, blockNameInput.textInput, blockSettingRow);
+
+  blockDisplay.append(container);
+
+  const addBlockSettingBtn = blockSettingRow.querySelector('[data-add-block-setting]');
+
+  if (addBlockSettingBtn) {
+    addBlockSettingBtn.addEventListener('click', e => {
+      e.preventDefault();
+
+      const additionalSettingDisplay = document.createElement('div');
+      additionalSettingDisplay.classList.add('input-field', 'col', 's9');
+      additionalSettingDisplay.innerHTML = newSettingMarkup;
+
+      blockSettingRow.append(additionalSettingDisplay);
+
+      var elems = choiceForm.querySelectorAll('select');
+      var instances = M.FormSelect.init(elems);
+    })
+  }
 
   var elems = choiceForm.querySelectorAll('select');
   var instances = M.FormSelect.init(elems);
@@ -47,36 +102,57 @@ addSettingBtn.addEventListener('click', e => {
 choiceForm.addEventListener('submit', e => {
   e.preventDefault();
 
+  //document.body.classList.add('review-settings-state', 'adding-data-to-components');
+
   // empty array
   // and remove anything appended to review form
   state.chosenFormElements = [];
   reviewFormElementsForm.innerHTML = '';
 
-  [...choiceForm.elements].forEach(element => {
+  let components = {
+    section: {},
+    sectionSettings: [],
+    blocks: [],
+  };
 
-    if (element.type === 'checkbox') {
-      if (element.checked) {
-        const value = element.nextElementSibling.innerText.toLowerCase();
-        state.chosenFormElements.push(value);
-      }
+  // Wraps checkboxes for section headers (name, class, input)
+  const sectionHeaderWrap = document.querySelector('.header-settings-wrap');
+
+  const sectionHeaderCheckboxes = [...sectionHeaderWrap.querySelectorAll('input[type="checkbox"]')];
+
+  sectionHeaderCheckboxes.forEach(element => {
+    if (element.name === 'name') {
+      components.section.name = true;
     }
 
-    if (element.type === 'button') {
-      return;
+    if (element.name === 'class') {
+      components.section.class = true;
     }
-  })
 
-  // update state
-  state.choosingFormElements = false;
-  state.reviewingForm = true;
+    if (element.name === 'name') {
+      components.section.limit = true;
+    }
+  });
 
-  let updatedChosenEls = state.chosenFormElements.filter(elements => elements !== 'Choose your option');
-  state.chosenFormElements = updatedChosenEls;
+  const sectionSettings = [...sectionSettingsContainer.querySelectorAll('ul.select-dropdown .selected')];
 
-  // save to session storage
-  sessionStorage.setItem('chosenFormElements', JSON.stringify(state.chosenFormElements));
+  sectionSettings.forEach(select => {
+    if (select.innerText === 'Choose your option') return;
 
-  buildFormElements(state.chosenFormElements);
+    components.sectionSettings.push(select.innerText);
+  });
+
+  // section settings
+
+  // blocks
+
+  // max_blocks
+
+  // presets
+
+  console.log(components);
+
+  // buildFormElements(state.chosenFormElements);
 })
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -239,6 +315,7 @@ function buildFormElements(array) {
   })
 
   const submitBtn = document.createElement('button');
+  submitBtn.classList.add('waves-effect', 'waves-light', 'btn-small');
   submitBtn.innerText = 'Submit';
 
   reviewFormElementsForm.append(submitBtn);
