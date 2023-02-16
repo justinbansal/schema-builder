@@ -1,15 +1,11 @@
 import { nanoid } from 'nanoid';
 
+import { SettingPicker } from './settingPicker';
+import { Block } from './block';
+
 //watchify app.js -p esmify -o bundle.js
 
-const state = {
-  choosingFormElements: true,
-  reviewingForm: false,
-  chosenFormElements: [],
-}
-
 let reviewFormElementsForm = document.querySelector('[data-review-form-elements]');
-
 reviewFormElementsForm.addEventListener('submit', reviewFormElementsFormSubmission);
 
 const addSettingBtn = document.querySelector('[data-add-setting]');
@@ -18,85 +14,18 @@ const blockDisplay = document.querySelector('[data-block-display]');
 const choiceForm = document.querySelector('[data-choose-form-elements]');
 const sectionSettingsContainer = choiceForm.querySelector('.section-settings-row');
 
-const newSettingMarkup = `
-  <select multiple>
-    <option value="" disabled selected>Choose your option</option>
-    <option value="checkbox">Checkbox</option>
-    <option value="number">Number</option>
-    <option value="radio">Radio</option>
-    <option value="range">Range</option>
-    <option value="select">Select</option>
-    <option value="text">Text</option>
-    <option value="textarea">Textarea</option>
-  </select>
-  <label>Setting picker</label>
-`;
-
 addSettingBtn.addEventListener('click', e => {
   e.preventDefault();
 
-  const newDiv = document.createElement('div');
-  newDiv.classList.add('input-field', 'col', 's12');
-  newDiv.id = nanoid();
-  newDiv.innerHTML = newSettingMarkup;
-
-  sectionSettingsContainer.append(newDiv);
-
-  var elems = choiceForm.querySelectorAll('select');
-  var instances = M.FormSelect.init(elems);
+  const settingPicker = new SettingPicker(sectionSettingsContainer);
+  settingPicker.create();
 })
 
 addBlockBtn.addEventListener('click', e => {
   e.preventDefault();
 
-  const container = document.createElement('div');
-  container.id = nanoid();
-  container.classList.add('block-setting');
-
-  // Add block type, name, settings
-  const blockTypeInput = createTextInput('Block Type', 'block-type');
-  const blockNameInput = createTextInput('Block Name', 'block-name');
-
-  const blockSettingRow = document.createElement('div');
-  blockSettingRow.classList.add('block-setting-row', 'col', 's12');
-
-  const newSettingMarkupDisplay = document.createElement('div');
-  newSettingMarkupDisplay.classList.add('input-field', 'col', 's9');
-  newSettingMarkupDisplay.innerHTML = newSettingMarkup;
-
-  const addBlockSettingBtnMarkup = `
-    <button class="btn-floating waves-effect waves-light btn-small red" data-add-block-setting><i class="material-icons">add</i></button>
-  `
-
-  const addBlockSettingDisplay = document.createElement('div');
-  addBlockSettingDisplay.classList.add('col', 's3');
-  addBlockSettingDisplay.innerHTML = addBlockSettingBtnMarkup;
-
-  blockSettingRow.append(newSettingMarkupDisplay, addBlockSettingDisplay);
-
-  container.append(blockTypeInput.labelInput, blockTypeInput.textInput, blockNameInput.labelInput, blockNameInput.textInput, blockSettingRow);
-
-  blockDisplay.append(container);
-
-  const addBlockSettingBtn = blockSettingRow.querySelector('[data-add-block-setting]');
-
-  if (addBlockSettingBtn) {
-    addBlockSettingBtn.addEventListener('click', e => {
-      e.preventDefault();
-
-      const additionalSettingDisplay = document.createElement('div');
-      additionalSettingDisplay.classList.add('input-field', 'col', 's9');
-      additionalSettingDisplay.innerHTML = newSettingMarkup;
-
-      blockSettingRow.append(additionalSettingDisplay);
-
-      var elems = choiceForm.querySelectorAll('select');
-      var instances = M.FormSelect.init(elems);
-    })
-  }
-
-  var elems = choiceForm.querySelectorAll('select');
-  var instances = M.FormSelect.init(elems);
+  const block = new Block(blockDisplay);
+  block.createBlock();
 })
 
 choiceForm.addEventListener('submit', e => {
@@ -104,15 +33,13 @@ choiceForm.addEventListener('submit', e => {
 
   //document.body.classList.add('review-settings-state', 'adding-data-to-components');
 
-  // empty array
-  // and remove anything appended to review form
-  state.chosenFormElements = [];
   reviewFormElementsForm.innerHTML = '';
 
   let components = {
     section: {},
     sectionSettings: [],
     blocks: [],
+    presets: [],
   };
 
   // Wraps checkboxes for section headers (name, class, input)
@@ -121,6 +48,7 @@ choiceForm.addEventListener('submit', e => {
   const sectionHeaderCheckboxes = [...sectionHeaderWrap.querySelectorAll('input[type="checkbox"]')];
 
   sectionHeaderCheckboxes.forEach(element => {
+    if (!element.checked) return;
     if (element.name === 'name') {
       components.section.name = true;
     }
@@ -129,8 +57,12 @@ choiceForm.addEventListener('submit', e => {
       components.section.class = true;
     }
 
-    if (element.name === 'name') {
+    if (element.name === 'limit') {
       components.section.limit = true;
+    }
+
+    if (element.name === 'maxBlocks') {
+      components.section.maxBlocks = true;
     }
   });
 
@@ -146,9 +78,29 @@ choiceForm.addEventListener('submit', e => {
 
   // blocks
 
-  // max_blocks
+  const blocks = blockDisplay.querySelectorAll('.block-wrapper');
 
-  // presets
+  blocks.forEach(block => {
+    let blockDetails = {
+      name: null,
+      type: null,
+      settings: []
+    }
+
+    const blockSettingsContainer = block.querySelector('.block-setting-wrapper');
+
+    const blockSettings = [...blockSettingsContainer.querySelectorAll('ul.select-dropdown .selected')];
+
+    blockSettings.forEach(select => {
+      if (select.innerText === 'Choose your option') return;
+
+      blockDetails.settings.push(select.innerText);
+    })
+
+    if (blockSettings.length > 0) {
+      components.blocks.push(blockDetails);
+    }
+  })
 
   console.log(components);
 
@@ -479,4 +431,9 @@ function buildSchema(array) {
   schemaDisplay.innerHTML = JSON.stringify(schema, null, " ");
 }
 
-// TODO: add support for blocks, max_blocks, and presets
+/* TODO
+ * Add support for blocks, max_blocks, and presets
+ * Add support for info, placeholder, header paragraph
+ * required vs optional
+ * preset name
+*/

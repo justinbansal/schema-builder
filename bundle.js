@@ -2,13 +2,10 @@
 "use strict";
 
 var _nanoid = require("nanoid");
+var _settingPicker = require("./settingPicker");
+var _block = require("./block");
 //watchify app.js -p esmify -o bundle.js
 
-const state = {
-  choosingFormElements: true,
-  reviewingForm: false,
-  chosenFormElements: []
-};
 let reviewFormElementsForm = document.querySelector('[data-review-form-elements]');
 reviewFormElementsForm.addEventListener('submit', reviewFormElementsFormSubmission);
 const addSettingBtn = document.querySelector('[data-add-setting]');
@@ -16,94 +13,45 @@ const addBlockBtn = document.querySelector('[data-add-block]');
 const blockDisplay = document.querySelector('[data-block-display]');
 const choiceForm = document.querySelector('[data-choose-form-elements]');
 const sectionSettingsContainer = choiceForm.querySelector('.section-settings-row');
-const newSettingMarkup = `
-  <select multiple>
-    <option value="" disabled selected>Choose your option</option>
-    <option value="checkbox">Checkbox</option>
-    <option value="number">Number</option>
-    <option value="radio">Radio</option>
-    <option value="range">Range</option>
-    <option value="select">Select</option>
-    <option value="text">Text</option>
-    <option value="textarea">Textarea</option>
-  </select>
-  <label>Setting picker</label>
-`;
 addSettingBtn.addEventListener('click', e => {
   e.preventDefault();
-  const newDiv = document.createElement('div');
-  newDiv.classList.add('input-field', 'col', 's12');
-  newDiv.id = (0, _nanoid.nanoid)();
-  newDiv.innerHTML = newSettingMarkup;
-  sectionSettingsContainer.append(newDiv);
-  var elems = choiceForm.querySelectorAll('select');
-  var instances = M.FormSelect.init(elems);
+  const settingPicker = new _settingPicker.SettingPicker(sectionSettingsContainer);
+  settingPicker.create();
 });
 addBlockBtn.addEventListener('click', e => {
   e.preventDefault();
-  const container = document.createElement('div');
-  container.id = (0, _nanoid.nanoid)();
-  container.classList.add('block-setting');
-
-  // Add block type, name, settings
-  const blockTypeInput = createTextInput('Block Type', 'block-type');
-  const blockNameInput = createTextInput('Block Name', 'block-name');
-  const blockSettingRow = document.createElement('div');
-  blockSettingRow.classList.add('block-setting-row', 'col', 's12');
-  const newSettingMarkupDisplay = document.createElement('div');
-  newSettingMarkupDisplay.classList.add('input-field', 'col', 's9');
-  newSettingMarkupDisplay.innerHTML = newSettingMarkup;
-  const addBlockSettingBtnMarkup = `
-    <button class="btn-floating waves-effect waves-light btn-small red" data-add-block-setting><i class="material-icons">add</i></button>
-  `;
-  const addBlockSettingDisplay = document.createElement('div');
-  addBlockSettingDisplay.classList.add('col', 's3');
-  addBlockSettingDisplay.innerHTML = addBlockSettingBtnMarkup;
-  blockSettingRow.append(newSettingMarkupDisplay, addBlockSettingDisplay);
-  container.append(blockTypeInput.labelInput, blockTypeInput.textInput, blockNameInput.labelInput, blockNameInput.textInput, blockSettingRow);
-  blockDisplay.append(container);
-  const addBlockSettingBtn = blockSettingRow.querySelector('[data-add-block-setting]');
-  if (addBlockSettingBtn) {
-    addBlockSettingBtn.addEventListener('click', e => {
-      e.preventDefault();
-      const additionalSettingDisplay = document.createElement('div');
-      additionalSettingDisplay.classList.add('input-field', 'col', 's9');
-      additionalSettingDisplay.innerHTML = newSettingMarkup;
-      blockSettingRow.append(additionalSettingDisplay);
-      var elems = choiceForm.querySelectorAll('select');
-      var instances = M.FormSelect.init(elems);
-    });
-  }
-  var elems = choiceForm.querySelectorAll('select');
-  var instances = M.FormSelect.init(elems);
+  const block = new _block.Block(blockDisplay);
+  block.createBlock();
 });
 choiceForm.addEventListener('submit', e => {
   e.preventDefault();
 
   //document.body.classList.add('review-settings-state', 'adding-data-to-components');
 
-  // empty array
-  // and remove anything appended to review form
-  state.chosenFormElements = [];
   reviewFormElementsForm.innerHTML = '';
   let components = {
     section: {},
     sectionSettings: [],
-    blocks: []
+    blocks: [],
+    presets: []
   };
 
   // Wraps checkboxes for section headers (name, class, input)
   const sectionHeaderWrap = document.querySelector('.header-settings-wrap');
   const sectionHeaderCheckboxes = [...sectionHeaderWrap.querySelectorAll('input[type="checkbox"]')];
   sectionHeaderCheckboxes.forEach(element => {
+    if (!element.checked) return;
     if (element.name === 'name') {
       components.section.name = true;
     }
     if (element.name === 'class') {
       components.section.class = true;
     }
-    if (element.name === 'name') {
+    if (element.name === 'limit') {
       components.section.limit = true;
+    }
+    if (element.name === 'maxBlocks') {
+      components.section.maxBlocks = true;
     }
   });
   const sectionSettings = [...sectionSettingsContainer.querySelectorAll('ul.select-dropdown .selected')];
@@ -116,10 +64,23 @@ choiceForm.addEventListener('submit', e => {
 
   // blocks
 
-  // max_blocks
-
-  // presets
-
+  const blocks = blockDisplay.querySelectorAll('.block-wrapper');
+  blocks.forEach(block => {
+    let blockDetails = {
+      name: null,
+      type: null,
+      settings: []
+    };
+    const blockSettingsContainer = block.querySelector('.block-setting-wrapper');
+    const blockSettings = [...blockSettingsContainer.querySelectorAll('ul.select-dropdown .selected')];
+    blockSettings.forEach(select => {
+      if (select.innerText === 'Choose your option') return;
+      blockDetails.settings.push(select.innerText);
+    });
+    if (blockSettings.length > 0) {
+      components.blocks.push(blockDetails);
+    }
+  });
   console.log(components);
 
   // buildFormElements(state.chosenFormElements);
@@ -376,9 +337,81 @@ function buildSchema(array) {
   schemaDisplay.innerHTML = JSON.stringify(schema, null, " ");
 }
 
-// TODO: add support for blocks, max_blocks, and presets
+/* TODO
+ * Add support for blocks, max_blocks, and presets
+ * Add support for info, placeholder, header paragraph
+ * required vs optional
+ * preset name
+*/
 
-},{"nanoid":2}],2:[function(require,module,exports){
+},{"./block":2,"./settingPicker":5,"nanoid":3}],2:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Block = void 0;
+var _nanoid = require("nanoid");
+class Block {
+  constructor(container) {
+    this.container = container;
+  }
+  createBlock() {
+    const blockWrapper = document.createElement('div');
+    blockWrapper.classList.add('block-wrapper', 'col', 's12');
+    blockWrapper.id = (0, _nanoid.nanoid)();
+    this.createBlockSetting({
+      buttonRequired: true
+    });
+  }
+  createBlockSetting(options) {
+    const {
+      buttonRequired
+    } = options || {};
+    const blockSettingWrapper = document.createElement('div');
+    blockSettingWrapper.classList.add('block-setting-wrapper', 'col', 's12');
+    blockSettingWrapper.innerHTML = this.getMarkup();
+    if (buttonRequired) {
+      blockSettingWrapper.append(this.createAddBlockSettingButton());
+    }
+    this.container.append(blockSettingWrapper);
+    this.initializePicker(blockSettingWrapper.querySelector('select'));
+  }
+  createAddBlockSettingButton() {
+    const buttonWrapper = document.createElement('div');
+    buttonWrapper.classList.add('col', 's3');
+    buttonWrapper.innerHTML = `<button class="btn-floating waves-effect waves-light btn-small red" data-add-block-setting><i class="material-icons">add</i></button>`;
+    this.addButtonEvents(buttonWrapper);
+    return buttonWrapper;
+  }
+  getMarkup() {
+    return `
+      <select multiple>
+        <option value="" disabled selected>Choose your option</option>
+        <option value="checkbox">Checkbox</option>
+        <option value="number">Number</option>
+        <option value="radio">Radio</option>
+        <option value="range">Range</option>
+        <option value="select">Select</option>
+        <option value="text">Text</option>
+        <option value="textarea">Textarea</option>
+      </select>
+      <label>Setting picker</label>
+    `;
+  }
+  initializePicker(select) {
+    M.FormSelect.init(select);
+  }
+  addButtonEvents(button) {
+    button.addEventListener('click', e => {
+      e.preventDefault();
+      this.createBlockSetting();
+    });
+  }
+}
+exports.Block = Block;
+
+},{"nanoid":3}],3:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -427,7 +460,7 @@ let nanoid = (size = 21) => crypto.getRandomValues(new Uint8Array(size)).reduce(
 }, '');
 exports.nanoid = nanoid;
 
-},{"./url-alphabet/index.js":3}],3:[function(require,module,exports){
+},{"./url-alphabet/index.js":4}],4:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -437,4 +470,47 @@ exports.urlAlphabet = void 0;
 const urlAlphabet = 'useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict';
 exports.urlAlphabet = urlAlphabet;
 
-},{}]},{},[1]);
+},{}],5:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.SettingPicker = void 0;
+var _nanoid = require("nanoid");
+class SettingPicker {
+  constructor(container) {
+    this.container = container;
+    this.select = null;
+  }
+  create() {
+    let divWrapper = document.createElement('div');
+    divWrapper.classList.add('input-field', 'col', 's12');
+    divWrapper.id = (0, _nanoid.nanoid)();
+    divWrapper.innerHTML = this.getMarkup();
+    this.container.append(divWrapper);
+    this.select = divWrapper.querySelector('select');
+    this.initializePicker();
+  }
+  getMarkup() {
+    return `
+      <select multiple>
+        <option value="" disabled selected>Choose your option</option>
+        <option value="checkbox">Checkbox</option>
+        <option value="number">Number</option>
+        <option value="radio">Radio</option>
+        <option value="range">Range</option>
+        <option value="select">Select</option>
+        <option value="text">Text</option>
+        <option value="textarea">Textarea</option>
+      </select>
+      <label>Setting picker</label>
+    `;
+  }
+  initializePicker() {
+    M.FormSelect.init(this.select);
+  }
+}
+exports.SettingPicker = SettingPicker;
+
+},{"nanoid":3}]},{},[1]);

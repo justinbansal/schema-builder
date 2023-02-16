@@ -31,7 +31,7 @@
           <div class="header-settings-wrap">
             <p>
               <label>
-                <input type="checkbox" class="filled-in" name="name"/>
+                <input type="checkbox" class="filled-in" name="name" />
                 <span>Section Name</span>
               </label>
             </p>
@@ -45,6 +45,12 @@
               <label>
                 <input type="checkbox" class="filled-in" name="limit" />
                 <span>Section Limit</span>
+              </label>
+            </p>
+            <p>
+              <label>
+                <input type="checkbox" class="filled-in" name="maxBlocks" />
+                <span>Max blocks</span>
               </label>
             </p>
           </div>
@@ -63,7 +69,8 @@
               <label>Setting picker</label>
             </div>
             <div class="col s3">
-              <button class="btn-floating waves-effect waves-light btn-small red" data-add-setting><i class="material-icons">add</i></button>
+              <button class="btn-floating waves-effect waves-light btn-small red" data-add-setting><i
+                  class="material-icons">add</i></button>
             </div>
           </div>
           <div class="row">
@@ -71,7 +78,7 @@
               <button class="waves-effect waves-light btn-small brown" data-add-block>Add Block 🧱</button>
             </p>
             <!-- Blocks will go here -->
-            <div class="block-display" data-block-display></div>
+            <div class="block-display col s12" data-block-display></div>
           </div>
           <div class="row submit-changes next-row">
             <p>
