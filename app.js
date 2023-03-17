@@ -8,7 +8,12 @@ optionButtons.forEach(button => {
 // DATA
 const dataColumn = document.querySelector('.data');
 const formLabel = document.querySelector('.data label');
-const textInput = document.querySelector('.data input');
+let textInput;
+let idInput;
+let labelInput;
+let infoInput;
+let defaultInput;
+let optionsInput;
 const attributeTemplate = document.querySelector('#attribute-template');
 const settingTemplate = document.querySelector('#setting-template');
 let key;
@@ -40,11 +45,12 @@ function handleOptionClick() {
     dataColumn.append(clonedMarkup);
   }
 
-  const idInput = document.querySelector('input[name="setting-id"]');
-  const labelInput = document.querySelector('input[name="setting-label"]');
-  const infoInput = document.querySelector('input[name="setting-info"]');
-  const defaultInput = document.querySelector('input[name="setting-default"]');
-  const optionsInput = document.querySelector('input[name="setting-options"]');
+  textInput = document.querySelector('.data input');
+  idInput = document.querySelector('input[name="setting-id"]');
+  labelInput = document.querySelector('input[name="setting-label"]');
+  infoInput = document.querySelector('input[name="setting-info"]');
+  defaultInput = document.querySelector('input[name="setting-default"]');
+  optionsInput = document.querySelector('input[name="setting-options"]');
   const submitBtn = document.querySelector('.data button');
   submitBtn.addEventListener('click', handleSubmit);
 
