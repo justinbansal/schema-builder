@@ -6,13 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Schema Builder</title>
-
-  <!--Import Google Icon Font-->
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
-  <!--Import materialize.css-->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
-  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
@@ -20,97 +14,76 @@
     <h1>Schema Builder 👷🏼‍♂️</h1>
   </div>
   <div id="app">
+    <div class="column options">
+      <h2>Attributes</h2>
 
-    <div class="choose-settings">
+      <button data-name="name" data-type="attribute">Name</button>
+      <button data-name="tag" data-type="attribute">Tag</button>
+      <button data-name="class" data-type="attribute">Class</button>
+      <button data-name="limit" data-type="attribute">Limit</button>
 
-      <h2>Choose your settings</h2>
-      <p>Add all of your setting components in this step.</p>
+      <h2>Basic setting inputs</h2>
 
-      <div class="choose-form-elements">
-        <form data-choose-form-elements>
-          <div class="header-settings-wrap">
-            <p>
-              <label>
-                <input type="checkbox" class="filled-in" name="name" />
-                <span>Section Name</span>
-              </label>
-            </p>
-            <p>
-              <label>
-                <input type="checkbox" class="filled-in" name="class" />
-                <span>Section Class</span>
-              </label>
-            </p>
-            <p>
-              <label>
-                <input type="checkbox" class="filled-in" name="limit" />
-                <span>Section Limit</span>
-              </label>
-            </p>
-            <p>
-              <label>
-                <input type="checkbox" class="filled-in" name="maxBlocks" />
-                <span>Max blocks</span>
-              </label>
-            </p>
-          </div>
-          <div class="row section-settings-row">
-            <div class="input-field col s9">
-              <select multiple>
-                <option value="" disabled selected>Choose your option</option>
-                <option value="checkbox">Checkbox</option>
-                <option value="number">Number</option>
-                <option value="radio">Radio</option>
-                <option value="range">Range</option>
-                <option value="select">Select</option>
-                <option value="text">Text</option>
-                <option value="textarea">Textarea</option>
-              </select>
-              <label>Setting picker</label>
-            </div>
-            <div class="col s3">
-              <button class="btn-floating waves-effect waves-light btn-small red" data-add-setting><i
-                  class="material-icons">add</i></button>
-            </div>
-          </div>
-          <div class="row">
-            <p>
-              <button class="waves-effect waves-light btn-small brown" data-add-block>Add Block 🧱</button>
-            </p>
-            <!-- Blocks will go here -->
-            <div class="block-display col s12" data-block-display></div>
-          </div>
-          <div class="row submit-changes next-row">
-            <p>
-              <button class="waves-effect waves-light btn-small green" data-save-choices>NEXT</button>
-            </p>
-          </div>
-        </form>
-      </div>
+      <button data-name="checkbox" data-type="setting">Checkbox</button>
+      <button data-name="number" data-type="setting">Number</button>
+      <button data-name="radio" data-type="setting">Radio</button>
+      <button data-name="range" data-type="setting">Range</button>
+      <button data-name="select" data-type="setting">Select</button>
+      <button data-name="text" data-type="setting">Text</button>
+      <button data-name="textarea" data-type="setting">Textarea</button>
     </div>
+    <div class="column data">
 
-    <div class="review-settings">
-
-      <h2>Fill in your settings</h2>
-      <p>Add data to all of your setting components in this step.</p>
-
-      <div class="review-form-elements">
-        <form data-review-form-elements>
-        </form>
-      </div>
     </div>
+    <div class="column preview">
+      <pre>
 
-    <pre>
-      <p>{% schema %}</p>
-      <p id="schema"></p>
-      <p>{% endschema %}</p>
-    </pre>
-
+      </pre>
+    </div>
   </div>
 
-  <!-- Compiled and minified JavaScript -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-  <script src="bundle.js"></script>
+  <template id="attribute-template">
+    <form>
+      <label for=""></label>
+      <input type="text">
+      <button>Submit</button>
+    </form>
+  </template>
+
+  <template id="setting-template">
+    <form>
+
+      <div class="form-group">
+        <label for="">ID</label>
+        <input name="setting-id" type="text">
+      </div>
+
+      <div class="form-group">
+        <label for="">Label</label>
+        <input name="setting-label" type="text">
+      </div>
+
+      <div class="form-group">
+        <label for="">Info</label>
+        <input name="setting-info" type="text">
+      </div>
+
+      <div class="form-group">
+        <label for="">Default</label>
+        <input name="setting-default" type="text">
+      </div>
+
+      <div class="form-group">
+        <label for="">Options</label>
+        <input name="setting-options" type="text">
+      </div>
+
+      <button>Submit</button>
+
+    </form>
+  </template>
+
+  <script src="app.js"></script>
 </body>
 
 </html>
